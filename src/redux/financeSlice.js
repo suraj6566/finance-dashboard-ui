@@ -2,10 +2,15 @@ import { createSlice } from "@reduxjs/toolkit";
 import { transactionsData } from "../data/mockData";
 
 const initialState = {
-  transactions: transactionsData, // All transactions loaded initially
-  role: "admin", // Changed to admin to see all features
-  search: "",
-  filter: "all",
+  transactions: transactionsData,
+  role: "admin",
+  filters: {
+    search: "",
+    category: "all",
+    type: "all",
+    date: "",
+  },
+  visibleCount: 8,
 };
 
 const financeSlice = createSlice({
@@ -15,37 +20,50 @@ const financeSlice = createSlice({
     setRole: (state, action) => {
       state.role = action.payload;
     },
-    setSearch: (state, action) => {
-      state.search = action.payload;
+    setFilters: (state, action) => {
+      state.filters = {
+        ...state.filters,
+        ...action.payload,
+      };
+      state.visibleCount = 8;
     },
-    setFilter: (state, action) => {
-      state.filter = action.payload;
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
+      state.visibleCount = 8;
+    },
+    loadMoreTransactions: (state) => {
+      state.visibleCount += 8;
     },
     addTransaction: (state, action) => {
-      state.transactions.push({
+      state.transactions.unshift({
         ...action.payload,
-        id: Date.now(),
+        id: crypto.randomUUID(),
       });
+    },
+    updateTransaction: (state, action) => {
+      const index = state.transactions.findIndex(
+        (transaction) => transaction.id === action.payload.id,
+      );
+      if (index >= 0) {
+        state.transactions[index] = action.payload;
+      }
     },
     deleteTransaction: (state, action) => {
       state.transactions = state.transactions.filter(
-        (t) => t.id !== action.payload
+        (transaction) => transaction.id !== action.payload,
       );
-    },
-    // New action to load transactions from API
-    setTransactions: (state, action) => {
-      state.transactions = action.payload;
     },
   },
 });
 
 export const {
   setRole,
-  setSearch,
-  setFilter,
+  setFilters,
+  resetFilters,
+  loadMoreTransactions,
   addTransaction,
+  updateTransaction,
   deleteTransaction,
-  setTransactions,
 } = financeSlice.actions;
 
 export default financeSlice.reducer;

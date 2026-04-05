@@ -1,146 +1,81 @@
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { memo, useMemo } from "react";
+import SectionCard from "./SectionCard";
+import { getFinanceSummary, getTopCategory } from "../utils/finance";
+import { formatCurrency } from "../utils/formatters";
 
-const Insights = memo(() => {
-  const { transactions } = useSelector((s) => s.finance);
+export default function Insights() {
+  const transactions = useSelector((state) => state.finance.transactions);
 
-  // Memoize calculations to prevent recalculation on every render
-  const insights = useMemo(() => {
-    const expenses = transactions.filter((t) => t.type === "expense");
-    const income = transactions.filter((t) => t.type === "income");
+  const summary = useMemo(() => getFinanceSummary(transactions), [transactions]);
+  const topCategory = useMemo(() => getTopCategory(transactions), [transactions]);
+  const savingsRate = summary.income
+    ? Math.round(((summary.income - summary.expense) / summary.income) * 100)
+    : 0;
 
-    const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
-    const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
-
-    // Category breakdown
-    const categorySpending = {};
-    expenses.forEach((e) => {
-      categorySpending[e.category] = (categorySpending[e.category] || 0) + e.amount;
-    });
-
-    const highestCategory = Object.keys(categorySpending).length > 0
-      ? Object.keys(categorySpending).reduce((a, b) =>
-          categorySpending[a] > categorySpending[b] ? a : b
-        )
-      : "N/A";
-
-    const highestAmount = categorySpending[highestCategory] || 0;
-    const avgDailySpending = expenses.length > 0 ? (totalExpense / transactions.length).toFixed(2) : 0;
-    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).toFixed(1) : 0;
-
-    return [
-      {
-        icon: "📊",
-        label: "Highest Spending",
-        value: highestCategory,
-        detail: `₹${highestAmount.toLocaleString()}`,
-        gradient: "from-red-400 to-pink-500"
-      },
-      {
-        icon: "📉",
-        label: "Avg Daily Spend",
-        value: `₹${avgDailySpending}`,
-        detail: "Based on all transactions",
-        gradient: "from-orange-400 to-red-500"
-      },
-      {
-        icon: "💰",
-        label: "Savings Rate",
-        value: `${savingsRate}%`,
-        detail: "% of income saved",
-        gradient: "from-green-400 to-emerald-500"
-      },
-      {
-        icon: "✨",
-        label: "Total Transactions",
-        value: transactions.length,
-        detail: `${expenses.length} expenses, ${income.length} income`,
-        gradient: "from-blue-400 to-indigo-500"
-      },
-    ];
-  }, [transactions]);
-
-  // Memoize savings rate for recommendation logic
-  const savingsRate = useMemo(() => {
-    const income = transactions
-      .filter((t) => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
-    const expenses = transactions
-      .filter((t) => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
-    return income > 0 ? ((income - expenses) / income * 100).toFixed(1) : 0;
-  }, [transactions]);
-
-  // Memoize highest category for recommendation
-  const highestCategory = useMemo(() => {
-    const expenses = transactions.filter((t) => t.type === "expense");
-    const categorySpending = {};
-    expenses.forEach((e) => {
-      categorySpending[e.category] = (categorySpending[e.category] || 0) + e.amount;
-    });
-    return Object.keys(categorySpending).length > 0
-      ? Object.keys(categorySpending).reduce((a, b) =>
-          categorySpending[a] > categorySpending[b] ? a : b
-        )
-      : "spending";
-  }, [transactions]);
-
-  const getRecommendation = () => {
-    const rate = parseFloat(savingsRate);
-    if (rate >= 30) {
-      return `🚀 Excellent! You're saving ${savingsRate}% of your income. Keep up this healthy financial habit!`;
-    } else if (rate >= 20) {
-      return `📈 Good job! You're saving ${savingsRate}% of your income. Try to push it to 30%+ for better financial health.`;
-    } else {
-      return `💡 Consider reducing ${highestCategory} spending to increase your savings rate.`;
-    }
-  };
+  const insightCards = [
+    {
+      label: "Saving score",
+      value: `${savingsRate}%`,
+      helper: "Higher means you are keeping more of your income.",
+    },
+    {
+      label: "Most spending happened in",
+      value: topCategory?.name ?? "No category yet",
+      helper: topCategory ? `${formatCurrency(topCategory.value)} spent here.` : "No expense category yet.",
+    },
+    {
+      label: "Total entries",
+      value: `${transactions.length}`,
+      helper: "Every income and expense record is saved locally.",
+    },
+  ];
+  const balanceStatus =
+    summary.balance >= 0 ? "You are spending within your income." : "Your spending is higher than your income.";
 
   return (
-    <div className="bg-linear-to-br from-white to-indigo-50 p-4 sm:p-5 md:p-6 rounded-2xl shadow-md border border-gray-200/50 animate-fade-in">
-      <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6">
-        💡 Financial Insights
-      </h3>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-        {insights.map((insight, idx) => (
+    <SectionCard eyebrow="Insights" title="Simple takeaways">
+      <div className="grid gap-4">
+        {insightCards.map((card, index) => (
           <div
-            key={idx}
-            className={`bg-linear-to-br ${insight.gradient} text-white p-3 sm:p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-150 animate-fade-in`}
-            style={{ animationDelay: `${idx * 50}ms` }}
+            key={card.label}
+            className={`rounded-[1.5rem] border border-slate-200 p-4 transition-all duration-200 hover:shadow-lg dark:border-slate-700/70 ${
+              index === 0
+                ? "bg-gradient-to-br from-violet-50 to-blue-50 dark:from-sky-500 dark:via-blue-500 dark:to-cyan-500"
+                : index === 1
+                  ? "bg-gradient-to-br from-rose-50 to-orange-50 dark:from-red-500 dark:via-orange-500 dark:to-amber-500"
+                  : "bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-violet-500 dark:via-purple-500 dark:to-cyan-500"
+            }`}
           >
-            <div className="flex items-start justify-between mb-2 sm:mb-3">
-              <span className="text-xl sm:text-2xl">{insight.icon}</span>
-            </div>
-            <p className="text-xs font-medium opacity-90 mb-1 line-clamp-2">
-              {insight.label}
-            </p>
-            <p className="text-sm sm:text-base font-bold line-clamp-1">
-              {insight.value}
-            </p>
-            <p className="text-xs opacity-80 mt-1 line-clamp-2">
-              {insight.detail}
-            </p>
+            <p className="text-sm font-medium text-slate-500 dark:text-white/85">{card.label}</p>
+            <p className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">{card.value}</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-white/90">{card.helper}</p>
           </div>
         ))}
-      </div>
 
-      {/* Smart recommendations */}
-      <div className="p-3 sm:p-4 md:p-5 bg-linear-to-r from-indigo-100 to-purple-100 rounded-xl border-2 border-indigo-300">
-        <div className="flex items-start gap-2 sm:gap-3">
-          <span className="text-2xl sm:text-3xl flex-shrink-0">🎯</span>
-          <div className="min-w-0">
-            <p className="font-bold text-gray-800 mb-1 text-sm sm:text-base">Smart Recommendation</p>
-            <p className="text-xs sm:text-sm text-gray-700 line-clamp-4">
-              {getRecommendation()}
-            </p>
+        <div className="rounded-[1.5rem] border border-slate-200 bg-white/70 p-5 dark:border-slate-700/70 dark:bg-[#18233a]">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-indigo-500 dark:text-cyan-300">
+            Quick overview
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
+            Your money story at a glance
+          </h3>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900/70">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Income vs spending</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                {formatCurrency(summary.income)} in and {formatCurrency(summary.expense)} out
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900/70">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Current status</p>
+              <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                {balanceStatus}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
-});
-
-Insights.displayName = 'Insights';
-
-export default Insights;
+}

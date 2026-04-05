@@ -1,18 +1,31 @@
 # 💰 Finance Dashboard UI
 
 A simple and clean finance dashboard built using React + Redux + Tailwind CSS v4.
-It helps to track income, expenses, and overall balance with a modern UI.
+It helps to track your daily spending and manage your money easily.
 
 ---
 
 ## 🚀 Features
 
-* Add and manage transactions
+* Add, edit, and delete transactions
+* Search and filter transactions
 * View total income, expenses, and balance
 * Interactive charts (Recharts)
+* Role-based access (Admin / Viewer)
+* Dark and light mode support
+* Data stored using localStorage
 * Clean and responsive UI
 * Fully responsive across mobile, tablet, and desktop screens
-* Modular component-based structure
+
+---
+
+## 👤 Roles
+
+* **Admin**
+  Can create, search, edit, and delete transactions
+
+* **Viewer**
+  Can only view data
 
 ---
 
@@ -31,9 +44,9 @@ It helps to track income, expenses, and overall balance with a modern UI.
 src/
 
 * components/ → reusable UI components
-* pages/ → main pages (Dashboard)
+* pages/ → Dashboard, Transactions, Analytics, Profile
 * redux/ → store and slices
-* styles/ → global styles (index.css)
+* styles/ → global styles
 
 ---
 
@@ -41,19 +54,19 @@ src/
 
 1. Clone the project
 
-```bash
+```bash id="9p4nka"
 git clone <your-repo-link>
 ```
 
 2. Install dependencies
 
-```bash
+```bash id="n9vzzp"
 npm install
 ```
 
 3. Run project
 
-```bash
+```bash id="3bh1e9"
 npm run dev
 ```
 
@@ -66,7 +79,7 @@ This project is built to practice frontend development concepts like:
 * state management (Redux)
 * UI structuring
 * responsive design
-* modern Tailwind usage
+* building a real-world dashboard UI
 
 ---
 
@@ -76,7 +89,7 @@ Tailwind CSS v4 is used, so:
 
 * No `@apply`
 * No `@tailwind` directives
-* Styling is mostly done using utility classes in JSX
+* Styling is done using utility classes in JSX
 
 ---
 

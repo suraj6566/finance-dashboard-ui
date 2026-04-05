@@ -1,18 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
-import { toggleDarkMode } from "../redux/financeSlice";
+import { toggleTheme } from "../redux/themeSlice";
 
-const ThemeToggle = () => {
+export default function ThemeToggle() {
   const dispatch = useDispatch();
-  const darkMode = useSelector((s) => s.finance.darkMode);
+  const mode = useSelector((state) => state.theme.mode);
+  const isDark = mode === "dark";
 
   return (
     <button
-      onClick={() => dispatch(toggleDarkMode())}
-      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700"
+      type="button"
+      onClick={() => dispatch(toggleTheme())}
+      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:shadow-lg dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
     >
-      {darkMode ? "☀️ Light" : "🌙 Dark"}
+      <span className={`inline-flex h-2.5 w-2.5 rounded-full ${isDark ? "bg-cyan-400" : "bg-amber-400"}`} />
+      {isDark ? "Dark" : "Light"}
     </button>
   );
-};
-
-export default ThemeToggle;
+}

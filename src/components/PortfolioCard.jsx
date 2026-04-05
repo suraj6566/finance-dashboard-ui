@@ -1,80 +1,70 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useMemo } from "react";
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import SectionCard from "./SectionCard";
 import { investmentData } from "../data/mockData";
-import { memo, useMemo } from "react";
+import { formatCurrency } from "../utils/formatters";
 
-const PortfolioCard = memo(() => {
-  const COLORS = ["#6366F1", "#EC4899", "#F59E0B", "#8B5CF6"];
-
-  // Memoize chart data and total investment
-  const { chartData, totalInvestment } = useMemo(() => {
-    const total = investmentData.reduce((sum, item) => sum + item.value, 0);
-    const data = investmentData.map(item => ({
-      name: item.name,
-      value: item.value
-    }));
-    return { chartData: data, totalInvestment: total };
-  }, []);
+export default function PortfolioCard() {
+  const total = useMemo(
+    () => investmentData.reduce((sum, item) => sum + item.value, 0),
+    [],
+  );
+  const bestPerformer = useMemo(
+    () => [...investmentData].sort((a, b) => b.return - a.return)[0],
+    [],
+  );
 
   return (
-    <div className="bg-linear-to-br from-white to-purple-50 p-4 sm:p-5 md:p-6 rounded-2xl shadow-md border border-gray-200/50 animate-fade-in">
-      <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-gray-800">
-        💼 Investment Portfolio
-      </h3>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <div>
-          <ResponsiveContainer width="100%" height={250}>
+    <SectionCard eyebrow="Portfolio" title="Allocation snapshot">
+      <div className="grid items-start gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                isAnimationActive={false}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Pie data={investmentData} dataKey="value" innerRadius={60} outerRadius={100}>
+                {investmentData.map((item, index) => (
+                  <Cell
+                    key={item.name}
+                    fill={["#4f46e5", "#06b6d4", "#10b981", "#f97316"][index % 4]}
+                  />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-              <Legend />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-3 sm:space-y-4">
-          <div className="p-3 sm:p-4 bg-linear-to-r from-indigo-50 to-purple-50 rounded-lg">
-            <p className="text-xs sm:text-sm text-gray-600">Total Investment</p>
-            <p className="text-xl sm:text-2xl font-bold text-indigo-600 mt-1">
-              ₹{(totalInvestment/1000).toFixed(0)}k
-            </p>
+        <div className="space-y-3">
+          <div className="rounded-[1.5rem] bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 p-4 text-white">
+            <p className="text-sm text-white/70">Total holdings</p>
+            <p className="mt-2 text-3xl font-semibold">{formatCurrency(total)}</p>
           </div>
-
-          <div className="space-y-2 sm:space-y-3">
-            {investmentData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:shadow-md transition-shadow duration-150 gap-2">
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                  <span className="text-xl sm:text-2xl flex-shrink-0">{item.icon}</span>
-                  <div className="min-w-0">
-                    <p className="text-sm sm:text-base font-medium text-gray-800 dark:text-white truncate">{item.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">₹{(item.value/1000).toFixed(0)}k</p>
-                  </div>
-                </div>
-                <div className={`text-sm sm:text-base font-semibold flex-shrink-0 ${item.return >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {item.return >= 0 ? '+' : ''}{item.return}%
-                </div>
+          {investmentData.map((item) => (
+            <div
+              key={item.name}
+              className="flex items-center justify-between rounded-[1.5rem] border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/70"
+            >
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400">{formatCurrency(item.value)}</p>
               </div>
-            ))}
+              <span className={`text-sm font-semibold ${item.return >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                {item.return > 0 ? "+" : ""}
+                {item.return}%
+              </span>
+            </div>
+          ))}
+
+          <div className="rounded-[1.5rem] border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/70">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Quick note</p>
+            <p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+              Best performer: {bestPerformer.name}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              {bestPerformer.return > 0 ? `Up ${bestPerformer.return}% right now.` : `Down ${Math.abs(bestPerformer.return)}% right now.`}
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
-});
-
-PortfolioCard.displayName = 'PortfolioCard';
-
-export default PortfolioCard;
+}

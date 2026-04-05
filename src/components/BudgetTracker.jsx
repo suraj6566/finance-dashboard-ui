@@ -1,60 +1,40 @@
+import SectionCard from "./SectionCard";
 import { budgetData } from "../data/mockData";
-import { memo } from "react";
+import { formatCurrency } from "../utils/formatters";
 
-const BudgetTracker = memo(() => {
+export default function BudgetTracker() {
   return (
-    <div className="bg-linear-to-br from-white to-green-50 p-4 sm:p-5 md:p-6 rounded-2xl shadow-md border border-gray-200/50 animate-fade-in w-full min-w-0">
-      <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4 sm:mb-6">
-        📋 Budget Overview
-      </h3>
+    <SectionCard eyebrow="Budgets" title="Budget guardrails">
+      <div className="grid gap-4">
+        {budgetData.map((item) => {
+          const statusColor =
+            item.percent > 100
+              ? "from-rose-500 to-orange-500"
+              : item.percent > 75
+                ? "from-amber-400 to-orange-500"
+                : "from-emerald-400 to-emerald-500";
 
-      <div className="space-y-5 w-full min-w-0">
-        {budgetData.map((item, idx) => (
-          <div
-            key={idx}
-            className="space-y-3 animate-fade-in w-full min-w-0"
-            style={{ animationDelay: `${idx * 50}ms` }}
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 min-w-0 w-full">
-              <span className="font-bold text-gray-900 truncate min-w-0 max-w-full wrap-break-word">{item.category}</span>
-              <span className="text-sm font-semibold text-gray-600 min-w-0 max-w-full wrap-break-word">
-                ₹{item.spent.toLocaleString()} / ₹{item.budget.toLocaleString()}
-              </span>
+          return (
+            <div
+              key={item.category}
+              className="rounded-[1.5rem] border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/70"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{item.category}</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">
+                    {formatCurrency(item.spent)} of {formatCurrency(item.budget)}
+                  </p>
+                </div>
+                <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">{item.percent}%</p>
+              </div>
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className={`h-full rounded-full bg-gradient-to-r ${statusColor}`} style={{ width: `${Math.min(item.percent, 100)}%` }} />
+              </div>
             </div>
-
-            <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden shadow-sm">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  item.percent > 100
-                    ? 'bg-linear-to-r from-red-400 to-red-600'
-                    : item.percent > 75
-                    ? 'bg-linear-to-r from-yellow-400 to-orange-500'
-                    : 'bg-linear-to-r from-green-400 to-green-600'
-                }`}
-                style={{ width: `${Math.min(item.percent, 100)}%` }}
-              />
-            </div>
-
-            <div className="flex flex-wrap justify-between items-center gap-2 text-xs text-gray-500 w-full">
-              <span className="min-w-0 max-w-full wrap-break-word">
-                {item.percent > 100 ? '⚠️ Over Budget' : '✅ On Track'} • {item.percent}%
-              </span>
-              <span className={`min-w-0 max-w-full wrap-break-word font-bold ${
-                item.percent > 100 ? 'text-red-500' : 'text-green-500'
-              }`}>
-                {item.percent > 100 
-                  ? `₹${(item.spent - item.budget).toLocaleString()} over`
-                  : `₹${(item.budget - item.spent).toLocaleString()} left`
-                }
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-    </div>
+    </SectionCard>
   );
-});
-
-BudgetTracker.displayName = 'BudgetTracker';
-
-export default BudgetTracker;
+}
