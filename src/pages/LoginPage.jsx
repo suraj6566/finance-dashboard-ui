@@ -25,10 +25,11 @@ export default function LoginPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    localStorage.setItem("isLoggedIn", "true");
 
     dispatch(
       loginSuccess({
-        name: "Demo User",
+        name: "Suraj",
         email,
       }),
     );
@@ -60,6 +61,9 @@ export default function LoginPage() {
             <h2 className="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">
               Login to continue
             </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              You can log in with the demo account. Just click the login button to continue.
+            </p>
           </div>
 
           <form className="grid gap-4" onSubmit={handleSubmit}>
@@ -87,7 +91,7 @@ export default function LoginPage() {
               type="submit"
               className="mt-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-lg"
             >
-              Sign in
+              Login with Demo Account
             </button>
           </form>
         </div>

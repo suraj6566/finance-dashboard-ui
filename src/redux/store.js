@@ -4,18 +4,43 @@ import authReducer from "./authSlice";
 import themeReducer from "./themeSlice";
 
 const STORAGE_KEY = "finance-dashboard-state";
+const LOGIN_KEY = "isLoggedIn";
+const AUTH_INITIALIZED_KEY = "finance-dashboard-auth-initialized";
+const demoUser = {
+  name: "Suraj",
+  email: "demo@financeflow.app",
+};
 
 const loadState = () => {
   try {
+    const loginFlag = localStorage.getItem(LOGIN_KEY);
+    const authInitialized = localStorage.getItem(AUTH_INITIALIZED_KEY);
+
+    if (!authInitialized && loginFlag === null) {
+      localStorage.setItem(LOGIN_KEY, "true");
+      localStorage.setItem(AUTH_INITIALIZED_KEY, "true");
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
+    const isLoggedIn = localStorage.getItem(LOGIN_KEY) === "true";
+
     if (!saved) {
-      return undefined;
+      return {
+        auth: {
+          isAuthenticated: isLoggedIn,
+          user: isLoggedIn ? demoUser : null,
+        },
+        theme: { mode: "dark" },
+      };
     }
 
     const parsed = JSON.parse(saved);
 
     return {
-      auth: parsed.auth ?? undefined,
+      auth: {
+        isAuthenticated: isLoggedIn,
+        user: isLoggedIn ? parsed.auth?.user ?? demoUser : null,
+      },
       theme: parsed.theme ?? { mode: "dark" },
       finance: parsed.finance
         ? {
@@ -32,6 +57,10 @@ const loadState = () => {
     };
   } catch {
     return {
+      auth: {
+        isAuthenticated: true,
+        user: demoUser,
+      },
       theme: { mode: "dark" },
     };
   }

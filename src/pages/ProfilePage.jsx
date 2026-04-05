@@ -17,7 +17,7 @@ export default function ProfilePage() {
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[1.75rem] bg-gradient-to-br from-slate-900 via-indigo-900 to-cyan-900 p-6 text-white">
             <p className="text-sm text-white/70">Account</p>
-            <h2 className="mt-2 text-3xl font-semibold">{user?.name ?? "Demo User"}</h2>
+            <h2 className="mt-2 text-3xl font-semibold">{user?.name ?? "Suraj"}</h2>
             <p className="mt-2 text-sm text-white/70">{user?.email ?? "demo@financeflow.app"}</p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/10 bg-white/10 p-4">

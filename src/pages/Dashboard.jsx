@@ -27,6 +27,7 @@ import {
 
 export default function Dashboard() {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
   const { transactions, filters, visibleCount, role } = useSelector((state) => state.finance);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +84,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="w-full rounded-[1.75rem] border border-cyan-200 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 px-5 py-4 text-white shadow-lg dark:border-slate-700 dark:shadow-[0_18px_45px_rgba(17,24,39,0.45)] sm:max-w-[320px] xl:w-auto">
-            <p className="text-sm font-medium text-white/85">Hello, Suraj</p>
+            <p className="text-sm font-medium text-white/85">Hello, {user?.name ?? "Suraj"}</p>
             <p className="text-sm text-white/70">Today</p>
             <p className="mt-1 text-lg font-semibold break-words sm:text-xl">
               {formatLongDate(new Date().toISOString())}

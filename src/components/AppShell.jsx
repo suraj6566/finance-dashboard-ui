@@ -25,6 +25,7 @@ export default function AppShell() {
   }, [mode]);
 
   const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
     dispatch(logout());
     navigate("/login", { replace: true });
   };
@@ -89,7 +90,7 @@ export default function AppShell() {
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500 dark:text-cyan-300">
                     Demo account
                   </p>
-                  <p className="mt-1 truncate text-lg font-semibold">{user?.name ?? "Demo User"}</p>
+                  <p className="mt-1 truncate text-lg font-semibold">{user?.name ?? "Suraj"}</p>
                   <p className="truncate text-sm text-slate-500 dark:text-slate-400">
                     {user?.email ?? "demo@financeflow.app"}
                   </p>
